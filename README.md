@@ -20,9 +20,6 @@ npm start
 ## 3. Configurar el frontend (Next.js)
 
 ### a. Ir a la carpeta del frontend
-```bash
-cd frontend
-```
 
 ### b. Instalar dependencias
 ```bash
