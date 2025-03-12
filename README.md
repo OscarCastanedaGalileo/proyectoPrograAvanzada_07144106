@@ -12,15 +12,33 @@ git clone https://github.com/OscarCastanedaGalileo/proyectoPrograAvanzada_071441
 npm install
 ```
 
-### c. Iniciar el servidor
+### b. Iniciar el servidor
 ```bash
 npm start
 ```
 
 ## 3. Configurar el frontend (Next.js)
 
-### a. Instalar dependencias
+### a. Ir a la carpeta del frontend
+```bash
+cd frontend
+```
+
+### b. Instalar dependencias
 ```bash
 npm install
+```
+
+### c. Iniciar la aplicación
+```bash
+npm run dev
+```
+Esto iniciará el servidor de desarrollo de Next.js en `http://localhost:3000`.
+
+## 4. Configurar Redux
+
+Si Redux aún no está instalado en el proyecto, agrégalo con:
+```bash
+npm install @reduxjs/toolkit react-redux
 ```
 
