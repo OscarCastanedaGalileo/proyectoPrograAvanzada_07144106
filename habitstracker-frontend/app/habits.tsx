@@ -36,7 +36,8 @@ export default function Habits({habits}: HabitState) {
                         <span className="text-black">{habit.titulo}</span>
 
                         <div className="flex items-center space-x-2">
-                            
+                            <progress className="w-32 h-4" value="50" max="100"></progress>
+                            <button className="px -2 py-1 text-sm text-white bg-blue-500 rounded-md">Done</button>
 
                         
 
