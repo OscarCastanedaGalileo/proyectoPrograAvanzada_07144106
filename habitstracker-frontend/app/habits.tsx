@@ -1,3 +1,8 @@
+import { UseSelector, useDispatch, useSelector } from "react-redux";
+import { markAsDoneThunk } from "@/features/habit/habitSlice";
+import { RootState, AppDispatch} from "../Redux/store";
+import { fetchHabitsThunk } from "@/features/habit/habitSlice";
+
 type Habits = {
 
     _id: string;
@@ -5,6 +10,10 @@ type Habits = {
     titulo: string;
 
     descripcion: string;
+    createdAt: string;
+    dias:number;
+    lastDone: Date;
+    lstUpdate: Date;
 
 
 }
@@ -15,9 +24,20 @@ type HabitState = {
 
 }
 
+const handleMarkAsDone = (dispatch: AppDispatch, habitId: string) => {
+    dispatch(markAsDoneThunk(habitId))
+    dispatch(fetchHabitsThunk());
+};
  
 
 export default function Habits({habits}: HabitState) {
+    const dispatch = useDispatch<AppDispatch>();
+    const status = useSelector((state: RootState) => state.habits.status);
+    const error = useSelector((state: RootState) => state.habits.error);
+
+    const calculateProgress = (days: number):number => {
+        return Math.min((days/66)*100, 100);
+    }
 
  
 
@@ -36,8 +56,10 @@ export default function Habits({habits}: HabitState) {
                         <span className="text-black">{habit.titulo}</span>
 
                         <div className="flex items-center space-x-2">
-                            <progress className="w-32 h-4" value="50" max="100"></progress>
-                            <button className="px -2 py-1 text-sm text-white bg-blue-500 rounded-md">Done</button>
+                            <progress className="w-32 h-4" value={calculateProgress(habit.dias)} max="100"></progress>
+                            <button className="px -2 py-1 text-sm text-white bg-blue-500 rounded-md" onClick={() => handleMarkAsDone(dispatch, habit._id)}>{status[habit._id]=== "loading" ? "Processing" : "Mark as Done"}</button>
+                            {status[habit._id] === "failed" && <span className="text-red-500">{error[habit._id]}</span>}
+                            {status[habit._id] === "success" && <span className="text-green-500">Already marked as done</span>}
 
                         
 
