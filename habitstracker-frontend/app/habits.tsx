@@ -1,7 +1,9 @@
 import { UseSelector, useDispatch, useSelector } from "react-redux";
-import { markAsDoneThunk } from "@/features/habit/habitSlice";
+import { markAsDoneThunk, fetchAddHabitsThunk } from "@/features/habit/habitSlice";
 import { RootState, AppDispatch} from "../Redux/store";
 import { fetchHabitsThunk } from "@/features/habit/habitSlice";
+import { useState } from "react";
+
 
 type Habits = {
 
@@ -24,9 +26,11 @@ type HabitState = {
 
 }
 
-const handleMarkAsDone = (dispatch: AppDispatch, habitId: string) => {
-    dispatch(markAsDoneThunk(habitId))
-    dispatch(fetchHabitsThunk());
+const handleMarkAsDone = (dispatch: AppDispatch, habitId: string, token: string) => {
+    dispatch(markAsDoneThunk({habitId, token}));
+    if(token){
+        dispatch(fetchHabitsThunk(token));
+    }
 };
  
 
@@ -34,10 +38,21 @@ export default function Habits({habits}: HabitState) {
     const dispatch = useDispatch<AppDispatch>();
     const status = useSelector((state: RootState) => state.habits.status);
     const error = useSelector((state: RootState) => state.habits.error);
+    const user = useSelector((state: RootState) => state.user.user);
+    const [titulo, setTitulo] = useState("");
+    const [descripcion, setDescripcion] = useState("");
 
     const calculateProgress = (days: number):number => {
         return Math.min((days/66)*100, 100);
-    }
+    };
+    const handleAddHabit = () => {
+        if(titulo && descripcion){
+            dispatch (fetchAddHabitsThunk({token: user?user.toString():"", titulo, descripcion}));
+            setTitulo("");
+            setDescripcion("");
+            dispatch(fetchHabitsThunk(user?user.toString():""));
+        }
+    };
 
  
 
@@ -57,7 +72,7 @@ export default function Habits({habits}: HabitState) {
 
                         <div className="flex items-center space-x-2">
                             <progress className="w-32 h-4" value={calculateProgress(habit.dias)} max="100"></progress>
-                            <button className="px -2 py-1 text-sm text-white bg-blue-500 rounded-md" onClick={() => handleMarkAsDone(dispatch, habit._id)}>{status[habit._id]=== "loading" ? "Processing" : "Mark as Done"}</button>
+                            <button className="px -2 py-1 text-sm text-white bg-blue-500 rounded-md" onClick={() => handleMarkAsDone(dispatch, habit._id, user ? user.toString():'' )}>{status[habit._id]=== "loading" ? "Processing" : "Mark as Done"}</button>
                             {status[habit._id] === "failed" && <span className="text-red-500">{error[habit._id]}</span>}
                             {status[habit._id] === "success" && <span className="text-green-500">Already marked as done</span>}
 

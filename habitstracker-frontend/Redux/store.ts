@@ -1,6 +1,7 @@
 import { configureStore } from "@reduxjs/toolkit";  
 
 import habitReducer from "../features/habit/habitSlice";
+import userReducer from "../features/user/userSlice";
 
  
 
@@ -11,6 +12,7 @@ export const makeStore = () => {
         reducer: {
 
             habits: habitReducer,
+            user: userReducer,
 
         },
 

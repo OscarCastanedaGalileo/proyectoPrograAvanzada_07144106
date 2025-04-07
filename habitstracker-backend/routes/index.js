@@ -1,6 +1,23 @@
 var express = require('express');
 var router = express.Router();
 const Habit = require('../modelo/habit');
+const jwt = require('jsonwebtoken');
+const mongoose = require('mongoose');
+const dotenv = require('dotenv');
+
+const authhenticateToken = (req, res, next) => {
+  const token = req.headers['Authorization'] || req.headers['authorization'];
+  if(!token) {
+    return res.status(401).json({message: "Acceso denegado, no se encontró el token"});
+  }try{
+    const tokenWithoutBearer = token.replace('Bearer ', '');
+    const verified = jwt.verify(tokenWithoutBearer, process.env.JWT_SECRET);
+    req.user = verified;
+    next();
+  }catch(error){
+    return res.status(403).json({message: "Token no válido o expirado"});
+  } 
+}
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
@@ -11,19 +28,23 @@ router.get('/hello', function(req, res, next) {
   res.json({"status": "success", "message": "Hello World!"});
 });
 
-router.get('/habits', async function(req, res) {
+router.get('/habits', authhenticateToken, async function(req, res) {
   try{
-    const habits = await Habit.find();
+    let userId = req.user && req.user.userId ? req.user.userId : res.status(500).json({message: "Error getting Habits"});
+
+    const habits = await Habit.find({ userId: mongoose.Types.ObjectId(userId) });
     res.json(habits);
   }catch(err){
     res.status(500).json({message: "Error getting habits"});
   }
 });
 
-router.post('/habits', async function(req, res) {
+router.post('/habits', authhenticateToken, async function(req, res) {
   try{
     const { titulo, descripcion } = req.body;
-    const habit = new Habit({ titulo, descripcion });
+    let userId = req.user && req.user.userId ? req.user.userId : res.status(500).json({message: "Error creating Habit"});
+    userId = mongoose.Types.ObjectId(userId);
+    const habit = new Habit({ titulo, descripcion, userId });
     await habit.save()
     res.json(habit);
   }catch(err){
@@ -31,7 +52,7 @@ router.post('/habits', async function(req, res) {
   }
 });
 
-router.delete('/habits/:id', async (req, res) => { 
+router.delete('/habits/:id', authhenticateToken, async (req, res) => { 
   try{
     await Habit.findByIdAndDelete(req.params.id);
     res.json({message: 'Habit deleted'});
